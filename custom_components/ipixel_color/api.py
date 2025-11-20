@@ -279,6 +279,56 @@ class iPIXELAPI:
             
         return device_info
 
+    def _get_optimal_font(self, draw, lines, max_width, max_height):
+        """Find the largest font size that fits all text within dimensions."""
+        # Try different font sizes from large to small
+        for size in range(min(max_height, max_width), 4, -1):
+            try:
+                # Try to load TrueType font, fall back to default
+                try:
+                    font = ImageFont.truetype("/System/Library/Fonts/Arial.ttf", size)
+                except:
+                    try:
+                        font = ImageFont.truetype("arial.ttf", size)  
+                    except:
+                        font = ImageFont.load_default()
+                
+                # Check if all lines fit within dimensions
+                fits = True
+                total_height = 0
+                
+                for line in lines:
+                    bbox = draw.textbbox((0, 0), line, font=font)
+                    text_width = bbox[2] - bbox[0]
+                    text_height = bbox[3] - bbox[1]
+                    
+                    # Check if line fits horizontally
+                    if text_width > max_width:
+                        fits = False
+                        break
+                        
+                    total_height += text_height
+                
+                # Check if all lines fit vertically
+                if total_height > max_height:
+                    fits = False
+                
+                if fits:
+                    _LOGGER.debug("Optimal font size: %d (total height: %d/%d)", 
+                                size, total_height, max_height)
+                    return font
+                    
+            except Exception as e:
+                _LOGGER.debug("Font size %d failed: %s", size, e)
+                continue
+        
+        # Fallback to smallest possible font
+        _LOGGER.warning("Using fallback font - text may not fit optimally")
+        try:
+            return ImageFont.truetype("/System/Library/Fonts/Arial.ttf", 6)
+        except:
+            return ImageFont.load_default()
+
     async def display_text(self, text: str) -> bool:
         """Display text as image using PIL."""
         try:
@@ -291,8 +341,36 @@ class iPIXELAPI:
             img = Image.new('RGB', (width, height), (0, 0, 0))
             draw = ImageDraw.Draw(img)
             
-            # Draw white text
-            draw.text((2, 2), text, fill=(255, 255, 255))
+            # Process multiline text
+            lines = text.split('\n') if '\n' in text else [text]
+            
+            # Find optimal font size that fits all text
+            font = self._get_optimal_font(draw, lines, width, height)
+            
+            # Calculate total text height for centering
+            total_height = 0
+            line_heights = []
+            for line in lines:
+                bbox = draw.textbbox((0, 0), line, font=font)
+                line_height = bbox[3] - bbox[1]
+                line_heights.append(line_height)
+                total_height += line_height
+            
+            # Start position for vertical centering
+            y_start = (height - total_height) // 2
+            current_y = y_start
+            
+            # Draw each line centered
+            for i, line in enumerate(lines):
+                bbox = draw.textbbox((0, 0), line, font=font)
+                text_width = bbox[2] - bbox[0]
+                
+                # Center horizontally
+                x = (width - text_width) // 2
+                
+                # Draw the line
+                draw.text((x, current_y), line, font=font, fill=(255, 255, 255))
+                current_y += line_heights[i]
             
             # Convert to PNG bytes
             png_buffer = io.BytesIO()
