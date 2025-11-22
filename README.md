@@ -72,6 +72,8 @@ Temp: {{ states('sensor.temperature') | round(1) }}°C
 
 ## Technical
 
-- Based on [ipixel-ctrl](https://github.com/sdolphin-JP/ipixel-ctrl) protocol
-- Requires: Home Assistant 2024.1+, Python 3.11+, `bleak`, `Pillow`
-- Test script: `python direct_text_test.py MAC_ADDRESS "text"`
+- Requires: Home Assistant 2024.1+ and HACS
+
+## License
+
+This project is licensed under the GNU General Public License v3.0 - see the LICENSE file for details.
