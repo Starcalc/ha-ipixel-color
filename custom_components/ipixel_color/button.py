@@ -12,6 +12,7 @@ from homeassistant.helpers.entity import DeviceInfo
 
 from .api import iPIXELAPI
 from .const import DOMAIN, CONF_ADDRESS, CONF_NAME
+from .common import resolve_template_variables
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -86,8 +87,9 @@ class iPIXELUpdateButton(ButtonEntity):
                 _LOGGER.debug("Reconnecting to device for manual update")
                 await self._api.connect()
             
-            # Process escape sequences before sending to display
-            processed_text = text.replace('\\n', '\n').replace('\\t', '\t')
+            # Resolve templates and process escape sequences before sending to display
+            template_resolved = await resolve_template_variables(self.hass, text)
+            processed_text = template_resolved.replace('\\n', '\n').replace('\\t', '\t')
             
             # Send text to display with current settings
             success = await self._api.display_text(processed_text, antialias, font_size, font_name, line_spacing)

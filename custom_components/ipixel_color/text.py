@@ -12,6 +12,7 @@ from homeassistant.helpers.entity import DeviceInfo
 
 from .api import iPIXELAPI, iPIXELConnectionError
 from .const import DOMAIN, CONF_ADDRESS, CONF_NAME
+from .common import resolve_template_variables
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -94,8 +95,9 @@ class iPIXELTextDisplay(TextEntity):
                 _LOGGER.debug("Auto-update disabled - text stored but not sent to display. Use update button to refresh.")
                 return
             
-            # Process escape sequences only when sending to display
-            processed_text = value.replace('\\n', '\n').replace('\\t', '\t')
+            # Resolve templates and process escape sequences when sending to display
+            template_resolved = await resolve_template_variables(self.hass, value)
+            processed_text = template_resolved.replace('\\n', '\n').replace('\\t', '\t')
             
             # Auto-update is enabled, proceed with display update
             await self._update_display(processed_text)
@@ -113,8 +115,9 @@ class iPIXELTextDisplay(TextEntity):
             text: Pre-processed text to display, or None to use stored text
         """
         if text is None:
-            # Use stored text and process escape sequences
-            text = self._current_text.replace('\\n', '\n').replace('\\t', '\t')
+            # Use stored text, resolve templates and process escape sequences
+            template_resolved = await resolve_template_variables(self.hass, self._current_text)
+            text = template_resolved.replace('\\n', '\n').replace('\\t', '\t')
             
         if not self._api.is_connected:
             _LOGGER.debug("Reconnecting to device before displaying text")
