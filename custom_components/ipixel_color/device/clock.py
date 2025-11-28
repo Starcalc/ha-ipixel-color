@@ -1,11 +1,15 @@
 """Clock mode commands for iPIXEL Color devices using pypixelcolor."""
 from __future__ import annotations
 
+from typing import Optional
+
 try:
     from pypixelcolor.commands.set_clock_mode import set_clock_mode
+    from pypixelcolor.commands.set_time import set_time
 except ImportError:
     # Fallback if pypixelcolor is not installed yet
     set_clock_mode = None
+    set_time = None
 
 
 def make_clock_mode_command(
@@ -42,6 +46,41 @@ def make_clock_mode_command(
         show_date=show_date,
         format_24=format_24
     )
+
+    # Extract the command bytes from the first (and only) window
+    if send_plan.windows and len(list(send_plan.windows)) > 0:
+        first_window = next(iter(send_plan.windows))
+        return first_window.data
+    else:
+        raise ValueError("pypixelcolor returned empty SendPlan")
+
+
+def make_time_command(
+    hour: Optional[int] = None,
+    minute: Optional[int] = None,
+    second: Optional[int] = None
+) -> bytes:
+    """Build time sync command using pypixelcolor.
+
+    Sends the current time to the device to keep the clock synchronized.
+
+    Args:
+        hour: Hour to set (0-23). If None, uses current hour.
+        minute: Minute to set (0-59). If None, uses current minute.
+        second: Second to set (0-59). If None, uses current second.
+
+    Returns:
+        Command bytes for setting time.
+
+    Raises:
+        ValueError: If time parameters are out of valid ranges.
+        ImportError: If pypixelcolor is not available.
+    """
+    if set_time is None:
+        raise ImportError("pypixelcolor library is not installed")
+
+    # Call pypixelcolor's set_time function
+    send_plan = set_time(hour=hour, minute=minute, second=second)
 
     # Extract the command bytes from the first (and only) window
     if send_plan.windows and len(list(send_plan.windows)) > 0:

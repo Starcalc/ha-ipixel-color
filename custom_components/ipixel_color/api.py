@@ -11,7 +11,7 @@ from .device.commands import (
     make_power_command,
     make_brightness_command,
 )
-from .device.clock import make_clock_mode_command
+from .device.clock import make_clock_mode_command, make_time_command
 from .device.text import make_text_command
 from .device.image import make_image_command
 from .device.info import build_device_info_command, parse_device_response
@@ -76,6 +76,29 @@ class iPIXELAPI:
             _LOGGER.error("Error setting brightness: %s", err)
             return False
 
+    async def sync_time(self) -> bool:
+        """Sync current time to the device.
+
+        This is useful for keeping the clock display accurate,
+        especially after the device has been running for a while.
+
+        Returns:
+            True if time was synced successfully
+        """
+        try:
+            time_command = make_time_command()
+            success = await self._bluetooth.send_command(time_command)
+
+            if success:
+                _LOGGER.debug("Time synchronized to device")
+            else:
+                _LOGGER.error("Failed to sync time")
+            return success
+
+        except Exception as err:
+            _LOGGER.error("Error syncing time: %s", err)
+            return False
+
     async def set_clock_mode(
         self,
         style: int = 1,
@@ -95,14 +118,22 @@ class iPIXELAPI:
             True if command was sent successfully
         """
         try:
+            # Set clock mode
             command = make_clock_mode_command(style, date, show_date, format_24)
             success = await self._bluetooth.send_command(command)
 
-            if success:
-                _LOGGER.info("Clock mode set: style=%d, 24h=%s, show_date=%s",
-                           style, format_24, show_date)
-            else:
+            if not success:
                 _LOGGER.error("Failed to set clock mode")
+                return False
+
+            _LOGGER.info("Clock mode set: style=%d, 24h=%s, show_date=%s",
+                       style, format_24, show_date)
+
+            # Sync current time to the device
+            time_success = await self.sync_time()
+            if not time_success:
+                _LOGGER.warning("Clock mode set but time sync failed")
+
             return success
 
         except ValueError as err:
