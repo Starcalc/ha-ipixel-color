@@ -53,7 +53,7 @@ class iPIXELUpdateButton(ButtonEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Update Display"
+        self._attr_name = "Update Display"
         self._attr_unique_id = f"{address}_update_button"
         self._attr_entity_description = "Manually update display with current text and settings"
         
@@ -96,7 +96,7 @@ class iPIXELSyncTimeButton(ButtonEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Sync Time"
+        self._attr_name = "Sync Time"
         self._attr_unique_id = f"{address}_sync_time_button"
         self._attr_entity_description = "Sync current time to device clock"
 

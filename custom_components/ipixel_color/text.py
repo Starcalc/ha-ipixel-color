@@ -54,7 +54,7 @@ class iPIXELTextDisplay(TextEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Display"
+        self._attr_name = "Display"
         self._attr_unique_id = f"{address}_text_display"
         self._current_text = ""
         self._available = True

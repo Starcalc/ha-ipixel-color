@@ -65,7 +65,7 @@ class iPIXELColorLight(LightEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._device_name = name
-        self._attr_name = f"{name} {self._light_name}"
+        self._attr_name = self._light_name  # Just the light name, device name is redundant
         self._attr_unique_id = f"{address}_{self._entity_suffix}"
         self._attr_is_on = True  # Always "on" since it's just a color picker
         self._attr_rgb_color = self._default_rgb

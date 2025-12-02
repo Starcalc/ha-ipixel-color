@@ -55,7 +55,7 @@ class iPIXELFontSelect(SelectEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Font"
+        self._attr_name = "Font"
         self._attr_unique_id = f"{address}_font_select"
         self._attr_entity_description = "Select font for text display (loads from fonts/ folder)"
         
@@ -150,7 +150,7 @@ class iPIXELModeSelect(SelectEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Mode"
+        self._attr_name = "Mode"
         self._attr_unique_id = f"{address}_mode_select"
         self._attr_entity_description = "Select display mode (textimage, clock, rhythm, fun)"
 
@@ -230,7 +230,7 @@ class iPIXELClockStyleSelect(SelectEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Clock Style"
+        self._attr_name = "Clock Style"
         self._attr_unique_id = f"{address}_clock_style_select"
         self._attr_entity_description = "Select clock display style (0-8)"
 

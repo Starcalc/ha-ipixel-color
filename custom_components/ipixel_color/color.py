@@ -100,7 +100,7 @@ class iPIXELColorBase(TextEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} {self._color_name}"
+        self._attr_name = self._color_name
         self._attr_unique_id = f"{address}_{self._entity_suffix}"
         self._current_value = self._default_color
 

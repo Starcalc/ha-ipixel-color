@@ -92,7 +92,7 @@ class iPIXELSensor(SensorEntity):
         self._device_name = name
         self.entity_description = description
         
-        self._attr_name = f"{name} {description.name}"
+        self._attr_name = description.name
         self._attr_unique_id = f"{address}_{description.key}"
         self._attr_native_value = None
         self._available = True

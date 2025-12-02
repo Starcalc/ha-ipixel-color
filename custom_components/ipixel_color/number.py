@@ -60,7 +60,7 @@ class iPIXELFontSize(NumberEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Font Size"
+        self._attr_name = "Font Size"
         self._attr_unique_id = f"{address}_font_size"
         self._attr_native_value = 0.0  # 0 means auto-sizing
         self._attr_entity_description = "Font size in pixels (0 = auto-sizing, supports decimals)"
@@ -133,7 +133,7 @@ class iPIXELLineSpacing(NumberEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Line Spacing"
+        self._attr_name = "Line Spacing"
         self._attr_unique_id = f"{address}_line_spacing"
         self._attr_native_value = 0  # Default to no extra spacing
         self._attr_entity_description = "Extra spacing between lines in pixels (for multiline text)"
@@ -203,7 +203,7 @@ class iPIXELBrightness(NumberEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Brightness"
+        self._attr_name = "Brightness"
         self._attr_unique_id = f"{address}_brightness"
         self._attr_native_value = 50  # Default brightness is 50%
         self._attr_entity_description = "Display brightness level (1-100)"
@@ -287,7 +287,7 @@ class iPIXELTextAnimation(NumberEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Text Animation"
+        self._attr_name = "Text Animation"
         self._attr_unique_id = f"{address}_text_animation"
         self._attr_native_value = 0  # Default to no animation
 
@@ -368,7 +368,7 @@ class iPIXELTextSpeed(NumberEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Text Speed"
+        self._attr_name = "Text Speed"
         self._attr_unique_id = f"{address}_text_speed"
         self._attr_native_value = 80  # Default speed
 
@@ -449,7 +449,7 @@ class iPIXELTextRainbow(NumberEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Text Rainbow"
+        self._attr_name = "Text Rainbow"
         self._attr_unique_id = f"{address}_text_rainbow"
         self._attr_native_value = 0  # Default to no rainbow
 

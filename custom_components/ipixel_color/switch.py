@@ -153,7 +153,7 @@ class iPIXELAntialiasingSwitch(SwitchEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Antialiasing"
+        self._attr_name = "Antialiasing"
         self._attr_unique_id = f"{address}_antialiasing"
         self._attr_entity_description = "Enable text antialiasing for smooth text (disable for sharp pixels)"
         self._is_on = True  # Default to antialiasing enabled
@@ -215,7 +215,7 @@ class iPIXELAutoUpdateSwitch(SwitchEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Auto Update"
+        self._attr_name = "Auto Update"
         self._attr_unique_id = f"{address}_auto_update"
         self._attr_entity_description = "Automatically update display when text or settings change"
         self._is_on = False  # Default to manual updates only
@@ -279,7 +279,7 @@ class iPIXELClock24HSwitch(SwitchEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Clock 24h"
+        self._attr_name = "Clock 24h"
         self._attr_unique_id = f"{address}_clock_24h"
         self._attr_entity_description = "Use 24-hour format for clock display"
         self._is_on = True  # Default to 24h format
@@ -363,7 +363,7 @@ class iPIXELClockShowDateSwitch(SwitchEntity, RestoreEntity):
         self._entry = entry
         self._address = address
         self._name = name
-        self._attr_name = f"{name} Clock Show Date"
+        self._attr_name = "Clock Show Date"
         self._attr_unique_id = f"{address}_clock_show_date"
         self._attr_entity_description = "Show date alongside time in clock display"
         self._is_on = True  # Default to showing date
