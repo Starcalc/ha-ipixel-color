@@ -10,36 +10,13 @@ from typing import Any, Tuple
 from PIL import Image, ImageDraw, ImageFont
 
 from ..color import hex_to_rgb
+from ..fonts import get_font_path
 
 _LOGGER = logging.getLogger(__name__)
 
 # Minimum font size to try
 MIN_FONT_SIZE = 4
 MARGIN_THRESHOLD = 64  # Pixel brightness threshold for margin detection
-
-
-def _get_font_path(font_name: str) -> str | None:
-    """Get path to font file from fonts/ folder.
-    
-    Args:
-        font_name: Font filename (with or without extension)
-        
-    Returns:
-        Full path to font file if found, None otherwise
-    """
-    # Add common font extensions if not present
-    if not any(font_name.lower().endswith(ext) for ext in ['.ttf', '.otf', '.woff', '.woff2']):
-        font_name += '.ttf'
-    
-    # Look in fonts/ folder relative to this module
-    fonts_dir = Path(__file__).parent.parent / 'fonts'
-    font_path = fonts_dir / font_name
-    
-    if font_path.exists():
-        return str(font_path)
-    
-    _LOGGER.warning("Font %s not found in %s", font_name, fonts_dir)
-    return None
 
 
 def render_text_to_png(text: str, width: int, height: int, antialias: bool = True, font_size: float | None = None, font: str | None = None, line_spacing: int = 0, text_color: str = "ffffff", bg_color: str = "000000") -> bytes:
@@ -286,13 +263,13 @@ def get_fixed_font(size: float, font_name: str | None = None) -> ImageFont.FreeT
     try:
         # Try to load custom font from fonts/ folder first
         if font_name:
-            font_path = _get_font_path(font_name)
+            font_path = get_font_path(font_name)
             if font_path:
                 try:
-                    return ImageFont.truetype(font_path, size)
+                    return ImageFont.truetype(str(font_path), size)
                 except Exception as e:
                     _LOGGER.warning("Could not load custom font %s: %s", font_name, e)
-        
+
         # Use default font if custom font failed or not specified
         return ImageFont.load_default()
     except Exception as e:
@@ -368,10 +345,10 @@ def get_optimal_font(draw: ImageDraw.Draw, lines: list[str],
                 # Try to load font at this size
                 font = None
                 if font_name:
-                    font_path = _get_font_path(font_name)
+                    font_path = get_font_path(font_name)
                     if font_path:
                         try:
-                            font = ImageFont.truetype(font_path, size)
+                            font = ImageFont.truetype(str(font_path), size)
                         except Exception as e:
                             _LOGGER.debug("Custom font %s failed at size %.1f: %s", font_name, size, e)
                 
