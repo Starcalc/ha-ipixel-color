@@ -14,6 +14,7 @@ except ImportError:
 def make_text_command(
     text: str,
     color: str = "ffffff",
+    bg_color: Optional[str] = None,
     font: str = "CUSONG",
     animation: int = 0,
     speed: int = 80,
@@ -26,6 +27,7 @@ def make_text_command(
     Args:
         text: The text to display
         color: Text color in hex format (e.g., 'ffffff')
+        bg_color: Background color in hex format (e.g., '000000'), or None for transparent
         font: Font name ('CUSONG', 'SIMSUN', 'VCR_OSD_MONO') or file path
         animation: Animation type (0-7, excluding 3&4 on non-32x32 devices)
         speed: Animation speed (0-100)
@@ -47,6 +49,7 @@ def make_text_command(
     send_plan = send_text(
         text=text,
         color=color,
+        bg_color=bg_color,
         font=font,
         animation=animation,
         speed=speed,
