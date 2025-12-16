@@ -269,6 +269,7 @@ class iPIXELAPI:
         self,
         text: str,
         color: str = "ffffff",
+        bg_color: str | None = None,
         font: str = "CUSONG",
         animation: int = 0,
         speed: int = 80,
@@ -279,6 +280,7 @@ class iPIXELAPI:
         Args:
             text: Text to display (supports emojis)
             color: Text color in hex format (e.g., 'ffffff')
+            bg_color: Background color in hex format (e.g., '000000'), or None for transparent
             font: Font name ('CUSONG', 'SIMSUN', 'VCR_OSD_MONO') or file path
             animation: Animation type (0-7)
             speed: Animation speed (0-100)
@@ -296,6 +298,7 @@ class iPIXELAPI:
             commands = make_text_command(
                 text=text,
                 color=color,
+                bg_color=bg_color,
                 font=font,
                 animation=animation,
                 speed=speed,
@@ -318,9 +321,10 @@ class iPIXELAPI:
                     return False
 
             _LOGGER.info(
-                "Pypixelcolor text sent: '%s' (color=%s, font=%s, anim=%d, speed=%d, frames=%d)",
+                "Pypixelcolor text sent: '%s' (color=%s, bg=%s, font=%s, anim=%d, speed=%d, frames=%d)",
                 text,
                 color,
+                bg_color or "none",
                 font,
                 animation,
                 speed,

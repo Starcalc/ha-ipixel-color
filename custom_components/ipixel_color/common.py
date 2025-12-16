@@ -6,8 +6,41 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.template import Template
 from homeassistant.helpers import entity_registry as er
 from .const import MODE_TEXT_IMAGE, MODE_TEXT, MODE_CLOCK, DOMAIN
+from .color import rgb_to_hex
 
 _LOGGER = logging.getLogger(__name__)
+
+
+def get_color_from_light_entity(hass: HomeAssistant, address: str, entity_suffix: str, default: str | None = None) -> str | None:
+    """Get hex color from a light entity.
+
+    Args:
+        hass: Home Assistant instance
+        address: Device address
+        entity_suffix: Entity suffix (e.g., 'text_color', 'background_color')
+        default: Default color if entity not found or off (None means no color/transparent)
+
+    Returns:
+        Hex color string (e.g., 'ffffff') or None if light is off/not found
+    """
+    entity_id = get_entity_id_by_unique_id(hass, address, entity_suffix, "light")
+    state = hass.states.get(entity_id) if entity_id else None
+
+    if not state:
+        return default
+
+    # If light is off, return None (transparent/no color)
+    if state.state == "off":
+        return None
+
+    if state.attributes.get("rgb_color"):
+        r, g, b = state.attributes["rgb_color"]
+        # Apply brightness
+        brightness = state.attributes.get("brightness", 255)
+        factor = brightness / 255.0
+        return rgb_to_hex(int(r * factor), int(g * factor), int(b * factor))
+
+    return default
 
 
 def get_entity_id_by_unique_id(hass: HomeAssistant, address: str, entity_suffix: str, platform: str = None) -> str | None:
@@ -128,55 +161,15 @@ async def _update_textimage_mode(hass: HomeAssistant, device_name: str, api, tex
         antialias = await _get_entity_setting(hass, device_name, "switch", "antialiasing", bool, api._address)
 
         # Get color settings from light entities
-        from .color import rgb_to_hex
+        text_color = get_color_from_light_entity(hass, api._address, "text_color", default="ffffff")
+        if text_color is None:
+            text_color = "000000"  # Light is off, use black
+        _LOGGER.debug("Text color: #%s", text_color)
 
-        # Get text color from light entity using unique_id lookup
-        text_color_entity_id = get_entity_id_by_unique_id(hass, api._address, "text_color", "light")
-        _LOGGER.debug("Text color entity_id lookup: %s (address=%s)", text_color_entity_id, api._address)
-        text_color_state = hass.states.get(text_color_entity_id) if text_color_entity_id else None
-        if text_color_state:
-            _LOGGER.debug("Text color light state: %s, attributes: %s",
-                         text_color_state.state, text_color_state.attributes)
-            # If light is off, interpret as black
-            if text_color_state.state == "off":
-                text_color = "000000"
-            elif text_color_state.attributes.get("rgb_color"):
-                # Get base RGB color
-                r, g, b = text_color_state.attributes["rgb_color"]
-                # Apply brightness (0-255)
-                brightness = text_color_state.attributes.get("brightness", 255)
-                brightness_factor = brightness / 255.0
-                r = int(r * brightness_factor)
-                g = int(g * brightness_factor)
-                b = int(b * brightness_factor)
-                text_color = rgb_to_hex(r, g, b)
-            else:
-                text_color = "ffffff"  # Default to white
-        else:
-            text_color = "ffffff"  # Default to white
-
-        # Get background color from light entity using unique_id lookup
-        bg_color_entity_id = get_entity_id_by_unique_id(hass, api._address, "background_color", "light")
-        _LOGGER.debug("Background color entity_id lookup: %s (address=%s)", bg_color_entity_id, api._address)
-        bg_color_state = hass.states.get(bg_color_entity_id) if bg_color_entity_id else None
-        if bg_color_state:
-            # If light is off, interpret as black
-            if bg_color_state.state == "off":
-                bg_color = "000000"
-            elif bg_color_state.attributes.get("rgb_color"):
-                # Get base RGB color
-                r, g, b = bg_color_state.attributes["rgb_color"]
-                # Apply brightness (0-255)
-                brightness = bg_color_state.attributes.get("brightness", 255)
-                brightness_factor = brightness / 255.0
-                r = int(r * brightness_factor)
-                g = int(g * brightness_factor)
-                b = int(b * brightness_factor)
-                bg_color = rgb_to_hex(r, g, b)
-            else:
-                bg_color = "000000"  # Default to black
-        else:
-            bg_color = "000000"  # Default to black
+        bg_color = get_color_from_light_entity(hass, api._address, "background_color", default="000000")
+        if bg_color is None:
+            bg_color = "000000"  # Light is off, use black
+        _LOGGER.debug("Background color: #%s", bg_color)
 
         # Connect if needed
         if not api.is_connected:
@@ -290,36 +283,15 @@ async def _update_text_mode(hass: HomeAssistant, device_name: str, api, text: st
             # Use pypixelcolor's built-in fonts or default
             font = "CUSONG"
 
-        # Get text color from light entity using unique_id lookup
-        from .color import rgb_to_hex
+        # Get text color from light entity
+        color = get_color_from_light_entity(hass, api._address, "text_color", default="ffffff")
+        if color is None:
+            color = "000000"  # Light is off, use black
+        _LOGGER.debug("Text mode - text color: #%s", color)
 
-        text_color_entity_id = get_entity_id_by_unique_id(hass, api._address, "text_color", "light")
-        _LOGGER.debug("Text mode - Text color entity_id lookup: %s (address=%s)", text_color_entity_id, api._address)
-        text_color_state = hass.states.get(text_color_entity_id) if text_color_entity_id else None
-        if text_color_state:
-            _LOGGER.debug("Text color light state: %s, attributes: %s",
-                         text_color_state.state, text_color_state.attributes)
-            # If light is off, interpret as black
-            if text_color_state.state == "off":
-                color = "000000"
-            elif text_color_state.attributes.get("rgb_color"):
-                # Get base RGB color
-                r, g, b = text_color_state.attributes["rgb_color"]
-                # Apply brightness (0-255)
-                brightness = text_color_state.attributes.get("brightness", 255)
-                brightness_factor = brightness / 255.0
-                r = int(r * brightness_factor)
-                g = int(g * brightness_factor)
-                b = int(b * brightness_factor)
-                color = rgb_to_hex(r, g, b)
-                _LOGGER.debug("Computed text color: #%s (RGB=%d,%d,%d, brightness=%d)",
-                             color, r, g, b, brightness)
-            else:
-                color = "ffffff"  # Default to white
-                _LOGGER.warning("No rgb_color attribute in light entity, using default white")
-        else:
-            color = "ffffff"  # Default to white
-            _LOGGER.warning("Text color light entity %s not found, using default white", text_color_entity_id)
+        # Get background color from light entity
+        bg_color = get_color_from_light_entity(hass, api._address, "background_color", default=None)
+        _LOGGER.debug("Text mode - background color: %s", f"#{bg_color}" if bg_color else "none")
 
         # Animation - need new number entity
         animation = await _get_entity_setting(hass, device_name, "number", "text_animation", int, api._address)
@@ -349,6 +321,7 @@ async def _update_text_mode(hass: HomeAssistant, device_name: str, api, text: st
         success = await api.display_text_pypixelcolor(
             text=processed_text,
             color=color,
+            bg_color=bg_color,
             font=font,
             animation=animation,
             speed=speed,
@@ -356,8 +329,8 @@ async def _update_text_mode(hass: HomeAssistant, device_name: str, api, text: st
         )
 
         if success:
-            _LOGGER.info("Text mode update successful: %s (color=#%s, font=%s, anim=%d, speed=%d)",
-                       processed_text, color, font, animation, speed)
+            _LOGGER.info("Text mode update successful: %s (color=#%s, bg=%s, font=%s, anim=%d, speed=%d)",
+                       processed_text, color, f"#{bg_color}" if bg_color else "none", font, animation, speed)
         else:
             _LOGGER.error("Text mode update failed")
 
