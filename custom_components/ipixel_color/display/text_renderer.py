@@ -63,34 +63,31 @@ def render_text_to_png(text: str, width: int, height: int, antialias: bool = Tru
     draw = ImageDraw.Draw(img)
 
     if text[0] == '#':
-        _LOGGER.debug(
-            "Special Operation started: %s",
-            text[1:]
-            )
-        _LOGGER.debug("My path: %s -- Font path: %s", os.getcwd(), os.path.abspath("custom_components/ipixel_color/fonts/DejaVuSans.ttf"))
         try:
             font = ImageFont.truetype("custom_components/ipixel_color/fonts/DejaVuSans.ttf", 10)
         except:
-            _LOGGER.debug("Loading Font failed.")
+            _LOGGER.debug("Loading Font failed, loading default.")
             font = ImageFont.load_default(size=9)
 
         draw.fontmode = "1" # No AntiAliasing
+        # Split text in 4 parts, ignoring the leading "#"
         parts = text[1:].split("\n")
+        # Convert the three initial numbers to int, the last one (battery level) to float
         n1 = int(parts[0].strip())
         n2 = int(parts[1].strip())
         n3 = int(parts[2].strip())
         n4 = float(parts[3].strip())
-        _LOGGER.debug( "Batterie: %f zu %.3.1f", n4, n4 )
-        # make_png
+        # Convert the numbers to strings (was separated here for easier debugging)
         s1 = f"{n1:5d}"
         s2 = f"{n2:5d}"
         s3 = f"{n3:4d}"
         s4 = f"{n4:3.1f}%"
+        # Colors. These hard hard implemented here, maybe update these later one. As for now, it's only customizable through this file.
         c1 = (255, 255, 255)
         c2 = (150, 200, 255)
         c3 = (255, 120, 0) if n3 < 0 else (120, 255, 160)
         c4 = (0, 100, 0)
-        # height & top-Offset
+
         _, top, _, bottom = draw.textbbox((0, 0), "012345", font=font)
         line_h = bottom - top
         baseline_shift = -top
@@ -113,7 +110,6 @@ def render_text_to_png(text: str, width: int, height: int, antialias: bool = Tru
         # Convert to PNG bytes
         png_buffer = io.BytesIO()
         img.save(png_buffer, format='PNG')
-        _LOGGER.debug( "Finished Converting to PNG" )
 
     else:
 
