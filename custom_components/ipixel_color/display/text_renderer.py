@@ -77,13 +77,15 @@ def render_text_to_png(text: str, width: int, height: int, antialias: bool = Tru
         n2 = int(parts[1].strip())
         n3 = int(parts[2].strip())
         n4 = float(parts[3].strip())
+        # Flag: negative PV means "warning / no feed-in compensation"
+        pv_warning = n1 < 0
         # Convert the numbers to strings (was separated here for easier debugging)
         s1 = f"{n1:5d}"
         s2 = f"{n2:5d}"
         s3 = f"{n3:4d}"
         s4 = f"{n4:3.1f}%"
         # Colors. These hard hard implemented here, maybe update these later one. As for now, it's only customizable through this file.
-        c1 = (255, 255, 255)
+        c1 = (255, 50, 50) if pv_warning else (255, 255, 255)
         c2 = (150, 200, 255)
         c3 = (255, 120, 0) if n3 < 0 else (120, 255, 160)
         c4 = (0, 100, 0)
