@@ -80,7 +80,7 @@ def render_text_to_png(text: str, width: int, height: int, antialias: bool = Tru
         # Flag: negative PV means "warning / no feed-in compensation"
         pv_warning = n1 < 0
         # Convert the numbers to strings (was separated here for easier debugging)
-        s1 = f"{n1:5d}"
+        s1 = f"{abs(n1):5d}"
         s2 = f"{n2:5d}"
         s3 = f"{n3:4d}"
         s4 = f"{n4:3.1f}%"
