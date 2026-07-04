@@ -116,26 +116,36 @@ def render_text_to_png(text: str, width: int, height: int, antialias: bool = Tru
     elif text[0] == '~':
         # Read png file and display that
         filename = text[1:].strip()
-        _LOGGER.warning("Requested image: %r", filename)
+        _LOGGER.warning("[~] Requested image: %r", filename)
         if not filename:
-            _LOGGER.error("No filename given after ~")
+            _LOGGER.error("[~] No filename given after ~")
             return
 
         try:
              with Image.open(filename) as img:
-                 _LOGGER.warning("mode=%s size=%s info=%s", img.mode, img.size, img.info)
-                 _LOGGER.warning("Opened image OK: %s", filename)
+                 _LOGGER.warning("[~] mode=%s size=%s info=%s", img.mode, img.size, img.info)
+                 _LOGGER.warning("[~] Opened image OK: %s", filename)
+                 img = img.convert("RGBA")
+                 alpha = img.getchannel("A")
+                 alpha_values = list(alpha.getdata())
+                 nonzero_alpha = sum(1 for a in alpha_values if a > 0)
+                 full_alpha = sum(1 for a in alpha_values if a == 255)
+                 _LOGGER.warning("[~] alpha: nonzero=%d/%d full=%d/%d bbox=%s",nonzero_alpha, len(alpha_values),full_alpha, len(alpha_values),alpha.getbbox(),)
+                 flat = Image.new("RGB", img.size, (0, 0, 0))
+                 flat.paste(img, mask=img.getchannel("A"))
+                 
                  png_buffer = io.BytesIO()
-                 img.save(png_buffer, format='PNG')
-                 _LOGGER.warning("Image saved in png_buffer")
+                 flat.save(png_buffer, format="PNG")
+                 # img.save(png_buffer, format='PNG')
+                 _LOGGER.warning("[~] Image saved in png_buffer")
         except FileNotFoundError:
-            _LOGGER.exception("File not found: %s", filename)
+            _LOGGER.exception("[~] File not found: %s", filename)
             return
         except UnidentifiedImageError:
-            _LOGGER.exception("Pillow could not read image: %s", filename)
+            _LOGGER.exception("[~] Pillow could not read image: %s", filename)
             return
         except Exception:
-            _LOGGER.exception("Unexpected error loading image: %s", filename)
+            _LOGGER.exception("[~] Unexpected error loading image: %s", filename)
             return
     else:
 
@@ -240,6 +250,12 @@ def render_text_to_png(text: str, width: int, height: int, antialias: bool = Tru
         # Convert to PNG bytes
         png_buffer = io.BytesIO()
         rgb_img.save(png_buffer, format='PNG')
+
+    png_bytes=png_buffer.getvalue()
+    _LOGGER.warning("[~] png len=%d first=%s last=%s",
+                len(png_bytes),
+                png_bytes[:8].hex(),
+                png_bytes[-8:].hex())
 
     return png_buffer.getvalue()
 
