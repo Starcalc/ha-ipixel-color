@@ -113,6 +113,24 @@ def render_text_to_png(text: str, width: int, height: int, antialias: bool = Tru
         png_buffer = io.BytesIO()
         img.save(png_buffer, format='PNG')
 
+    elif text[0] == '~':
+        # Read png file and display that
+        filename = text[1:].strip()
+        if not filename:
+            print("No filename given after ~")
+            return
+
+        try:
+             with Image.open(filename) as img:
+                 png_buffer = io.BytesIO()
+                 img.save(png_buffer, format='PNG')
+        except FileNotFoundError:
+            print(f"File not found: {filename}")
+        except UnidentifiedImageError:
+            print(f"Not a valid image file: {filename}")
+        except OSError as e:
+            print(f"Error opening image {filename}: {e}")
+
     else:
 
         # Process multiline text
