@@ -116,21 +116,27 @@ def render_text_to_png(text: str, width: int, height: int, antialias: bool = Tru
     elif text[0] == '~':
         # Read png file and display that
         filename = text[1:].strip()
+        _LOGGER.warning("Requested image: %r", filename)
         if not filename:
-            print("No filename given after ~")
+            _LOGGER.error("No filename given after ~")
             return
 
         try:
              with Image.open(filename) as img:
+                 _LOGGER.warning("mode=%s size=%s info=%s", img.mode, img.size, img.info)
+                 _LOGGER.warning("Opened image OK: %s", filename)
                  png_buffer = io.BytesIO()
                  img.save(png_buffer, format='PNG')
+                 _LOGGER.warning("Image saved in png_buffer")
         except FileNotFoundError:
-            print(f"File not found: {filename}")
+            _LOGGER.exception("File not found: %s", filename)
+            return
         except UnidentifiedImageError:
-            print(f"Not a valid image file: {filename}")
-        except OSError as e:
-            print(f"Error opening image {filename}: {e}")
-
+            _LOGGER.exception("Pillow could not read image: %s", filename)
+            return
+        except Exception:
+            _LOGGER.exception("Unexpected error loading image: %s", filename)
+            return
     else:
 
         # Process multiline text
