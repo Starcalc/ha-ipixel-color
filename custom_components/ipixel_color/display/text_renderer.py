@@ -83,8 +83,12 @@ def render_text_to_png(text: str, width: int, height: int, antialias: bool = Tru
         s1 = f"{abs(n1):5d}"
         s2 = f"{n2:5d}"
         s3 = f"{n3:4d}"
-        s4 = f"{n4:3.1f}%"
-        # Colors. These hard hard implemented here, maybe update these later one. As for now, it's only customizable through this file.
+#        s4 = f"{n4:3.1f}%"
+        if round(n4, 1) == 100.0:
+            s4 = f"{n4:3.0f}%"
+        else:
+            s4 = f"{n4:3.1f}%"
+        # Colors. These hard hard implemented here, maybe update these later on. As for now, it's only customizable through this file.
         c1 = (255, 50, 50) if pv_warning else (255, 255, 255)
         c2 = (150, 200, 255)
         c3 = (255, 120, 0) if n3 < 0 else (120, 255, 160)
